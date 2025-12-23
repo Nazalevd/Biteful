@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground">
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@android:drawable/ic_menu_recent_history"
+        android:layout_marginEnd="12dp"
+        android:alpha="0.5"/>
+
+    <TextView
+        android:id="@+id/tvHistoryText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Burger"
+        android:textSize="16sp"
+        android:textColor="#333333"/>
+
+    <ImageView
+        android:id="@+id/btnDeleteHistory"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_delete"
+        android:padding="2dp"
+        android:alpha="0.6"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
+</LinearLayout>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="msku.ceng.madlab.biteful.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_home_to_menu"
+            app:destination="@+id/restaurantMenuFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_search"
+        android:name="msku.ceng.madlab.biteful.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search" />
+
+    <fragment
+        android:id="@+id/nav_cart"
+        android:name="msku.ceng.madlab.biteful.CartFragment"
+        android:label="Cart"
+        tools:layout="@layout/fragment_cart" />
+
+    <fragment
+        android:id="@+id/nav_favorites"
+        android:name="msku.ceng.madlab.biteful.FavoritesFragment"
+        android:label="Favorites"
+        tools:layout="@layout/fragment_favorites" />
+
+    <fragment
+        android:id="@+id/nav_account"
+        android:name="msku.ceng.madlab.biteful.AccountFragment"
+        android:label="Account"
+        tools:layout="@layout/fragment_account">
+
+        <action
+            android:id="@+id/action_account_to_orders"
+            app:destination="@id/ordersFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/restaurantMenuFragment"
+        android:name="msku.ceng.madlab.biteful.RestaurantMenuFragment"
+        android:label="Menu"
+        tools:layout="@layout/fragment_restaurant_menu" />
+
+    <fragment
+        android:id="@+id/ordersFragment"
+        android:name="msku.ceng.madlab.biteful.OrdersFragment"
+        android:label="My Orders"
+        tools:layout="@layout/fragment_orders" />
+
+</navigation>

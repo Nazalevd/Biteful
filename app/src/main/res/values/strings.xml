@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Biteful</string>
+    <string name="search_food_title">Search Food</string>
+    <string name="desc_back_button">Go Back</string>
+</resources>
