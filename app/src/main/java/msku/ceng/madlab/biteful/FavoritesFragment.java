@@ -10,22 +10,19 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import msku.ceng.madlab.biteful.database.BitefulDatabase;
-import msku.ceng.madlab.biteful.database.Favorite;
-
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FavoritesFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private View layoutEmptyFav;
-    private RestaurantAdapter adapter;
-    private List<Restaurant> favoriteList = new ArrayList<>();
+    private FavoritesAdapter adapter;
+    private List<Favorites> favoritesList = new ArrayList<>();
+    private View layoutEmpty;
 
-    public FavoritesFragment() {
-    }
+    public FavoritesFragment() { }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,52 +34,50 @@ public class FavoritesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.rvFavorites);
-        layoutEmptyFav = view.findViewById(R.id.layoutEmptyFav);
+        layoutEmpty = view.findViewById(R.id.layoutEmptyFavorites);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new RestaurantAdapter(favoriteList, restaurant -> {
+        adapter = new FavoritesAdapter(favoritesList, item -> {
+            Restaurant tempRestaurant = new Restaurant(
+                    item.getRestaurantName(),
+                    item.getRating(),
+                    item.getDeliveryTime(),
+                    item.getImageResId()
+            );
+
             Bundle bundle = new Bundle();
-            bundle.putSerializable("restaurantObj", restaurant);
+            bundle.putSerializable("restaurantObj", tempRestaurant);
             Navigation.findNavController(view).navigate(R.id.restaurantMenuFragment, bundle);
         });
-
-        adapter.setIsFavoritesList(true);
 
         recyclerView.setAdapter(adapter);
 
         loadFavorites();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadFavorites();
-    }
-
     private void loadFavorites() {
-        BitefulDatabase.databaseWriteExecutor.execute(() -> {
-            List<Favorite> dbFavorites = BitefulDatabase.getDatabase(requireContext()).bitefulDao().getAllFavorites();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-            List<Restaurant> tempUiList = new ArrayList<>();
-            for (Favorite f : dbFavorites) {
-                tempUiList.add(new Restaurant(f.restaurantName, f.rating, f.deliveryTime, f.imageResId));
+        db.collection("favorites").get().addOnSuccessListener(queryDocumentSnapshots -> {
+            favoritesList.clear();
+            for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                Favorites item = doc.toObject(Favorites.class);
+                if (item != null) {
+                    item.setDocumentId(doc.getId());
+                    favoritesList.add(item);
+                }
             }
+            adapter.notifyDataSetChanged();
 
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    favoriteList.clear();
-                    favoriteList.addAll(tempUiList);
-                    adapter.notifyDataSetChanged();
-
-                    if (favoriteList.isEmpty()) {
-                        recyclerView.setVisibility(View.GONE);
-                        layoutEmptyFav.setVisibility(View.VISIBLE);
-                    } else {
-                        recyclerView.setVisibility(View.VISIBLE);
-                        layoutEmptyFav.setVisibility(View.GONE);
-                    }
-                });
+            if (layoutEmpty != null) {
+                if (favoritesList.isEmpty()) {
+                    layoutEmpty.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                } else {
+                    layoutEmpty.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
             }
         });
     }

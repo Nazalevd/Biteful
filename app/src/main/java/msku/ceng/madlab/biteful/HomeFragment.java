@@ -85,7 +85,6 @@ public class HomeFragment extends Fragment {
         allRestaurants.add(new Restaurant("Doner House", "⭐ 4.8 (5000+)", "10-15 min", R.drawable.res_doner_house));
         allRestaurants.add(new Restaurant("Sushi Co", "⭐ 4.5 (800+)", "40-50 min", R.drawable.res_sushi_co));
         allRestaurants.add(new Restaurant("Waffle World", "⭐ 4.0 (900+)", "20-30 min", R.drawable.res_waffle_world));
-        allRestaurants.add(new Restaurant("Burger King", "⭐ 3.9 (10k+)", "15-25 min", R.drawable.res_burger_king));
     }
 
     private void filterRestaurantsByCategory(String category) {

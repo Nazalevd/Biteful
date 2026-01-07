@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,8 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import msku.ceng.madlab.biteful.database.BitefulDatabase;
-import msku.ceng.madlab.biteful.database.CartItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,24 +71,20 @@ public class RestaurantMenuFragment extends Fragment {
 
         fullMenuList.clear();
 
-
         if (restaurantName != null && (restaurantName.contains("Pizza") || restaurantName.contains("Pizz"))) {
             if(btn1 != null) btn1.setText("Pizzas");
             if(btn2 != null) btn2.setText("Slices");
             if(btn3 != null) btn3.setText("Drinks");
             if(btn4 != null) btn4.setText("Sauces");
 
-
-            fullMenuList.add(new FoodItem("Pepperoni Pizza", "Spicy & Hot", 220.00, android.R.drawable.ic_menu_gallery, "Pizza"));
-            fullMenuList.add(new FoodItem("Margarita Pizza", "Mozzarella Cheese", 180.00, android.R.drawable.ic_menu_gallery, "Pizza"));
-            fullMenuList.add(new FoodItem("Mushroom Pizza", "Fresh Mushrooms", 195.00, android.R.drawable.ic_menu_gallery, "Pizza"));
-            fullMenuList.add(new FoodItem("Pizza Slice", "Single Slice", 40.00, android.R.drawable.ic_menu_gallery, "Slice")); // Type: Slice
-            fullMenuList.add(new FoodItem("Cola", "Cold Drink", 50.00, android.R.drawable.ic_menu_gallery, "Drink"));
-            fullMenuList.add(new FoodItem("Fanta", "Cold Drink", 50.00, android.R.drawable.ic_menu_gallery, "Drink"));
-            fullMenuList.add(new FoodItem("Ranch Sauce", "Dip Sauce", 15.00, android.R.drawable.ic_menu_gallery, "Sauce")); // Type: Sauce
+            fullMenuList.add(new FoodItem("Pepperoni Pizza", "Spicy & Hot", 220.00, R.drawable.pepperoni, "Pizza"));
+            fullMenuList.add(new FoodItem("Margarita Pizza", "Mozzarella Cheese", 180.00, R.drawable.margarita, "Pizza"));
+            fullMenuList.add(new FoodItem("Mushroom Pizza", "Fresh Mushrooms", 195.00, R.drawable.mushroom_pizza, "Pizza"));
+            fullMenuList.add(new FoodItem("Pizza Slice", "Single Slice", 40.00,R.drawable.pizza_slice, "Slice"));
+            fullMenuList.add(new FoodItem("Cola", "Cold Drink", 50.00, R.drawable.cola, "Drink"));
+            fullMenuList.add(new FoodItem("Ranch Sauce", "Dip Sauce", 15.00, R.drawable.ranch, "Sauce"));
 
             setupButtons(btn1, btn2, btn3, btn4, "Pizza", "Slice", "Drink", "Sauce");
-
 
         } else if (restaurantName != null && (restaurantName.contains("Sushi") || restaurantName.contains("sushi"))) {
             if(btn1 != null) btn1.setText("Sushi");
@@ -99,15 +92,13 @@ public class RestaurantMenuFragment extends Fragment {
             if(btn3 != null) btn3.setText("Noodles");
             if(btn4 != null) btn4.setText("Drinks");
 
-            fullMenuList.add(new FoodItem("Salmon Nigiri", "Sushi Fresh Salmon", 120.00, android.R.drawable.ic_menu_gallery, "Sushi"));
-            fullMenuList.add(new FoodItem("California Roll", "Crab & Avocado", 180.00, android.R.drawable.ic_menu_gallery, "Roll"));
-            fullMenuList.add(new FoodItem("Spicy Tuna Roll", "Tuna & Spicy Mayo", 150.00, android.R.drawable.ic_menu_gallery, "Roll"));
-            fullMenuList.add(new FoodItem("Veggie Noodles", "With Vegetables", 200.00, android.R.drawable.ic_menu_gallery, "Noodle"));
-            fullMenuList.add(new FoodItem("Green Tea", "Hot Drink", 30.00, android.R.drawable.ic_menu_gallery, "Drink"));
-            fullMenuList.add(new FoodItem("Water", "Drink", 15.00, android.R.drawable.ic_menu_gallery, "Drink"));
+            fullMenuList.add(new FoodItem("Salmon Nigiri", "Sushi Fresh Salmon", 120.00, R.drawable.salmon_nigiri, "Sushi"));
+            fullMenuList.add(new FoodItem("California Roll", "Crab & Avocado", 180.00, R.drawable.california_roll, "Roll"));
+            fullMenuList.add(new FoodItem("Veggie Noodles", "With Vegetables", 200.00,R.drawable.veggie_noodle, "Noodle"));
+            fullMenuList.add(new FoodItem("Green Tea", "Hot Drink", 30.00,R.drawable.green_tea, "Drink"));
+            fullMenuList.add(new FoodItem("Water", "Drink", 15.00, R.drawable.water, "Drink"));
 
             setupButtons(btn1, btn2, btn3, btn4, "Sushi", "Roll", "Noodle", "Drink");
-
 
         } else if (restaurantName != null && (restaurantName.contains("Doner") || restaurantName.contains("Döner"))) {
             if(btn1 != null) btn1.setText("Dürümler");
@@ -115,17 +106,14 @@ public class RestaurantMenuFragment extends Fragment {
             if(btn3 != null) btn3.setText("İçecekler");
             if(btn4 != null) btn4.setText("Tatlılar");
 
-            // Type'ları kesinleştirdik: "Dürüm", "Porsiyon", "Drink", "Dessert"
-            fullMenuList.add(new FoodItem("Et Döner Dürüm", "Traditional Taste", 150.00, android.R.drawable.ic_menu_gallery, "Dürüm"));
-            fullMenuList.add(new FoodItem("Tavuk Döner Dürüm", "Classic Chicken", 100.00, android.R.drawable.ic_menu_gallery, "Dürüm"));
-            fullMenuList.add(new FoodItem("Pilav Üstü Porsiyon", "With Rice", 200.00, android.R.drawable.ic_menu_gallery, "Porsiyon"));
-            fullMenuList.add(new FoodItem("İskender Porsiyon", "Special Sauce", 250.00, android.R.drawable.ic_menu_gallery, "Porsiyon"));
-            fullMenuList.add(new FoodItem("Ayran", "Fresh Yoghurt Drink", 20.00, android.R.drawable.ic_menu_gallery, "Drink"));
-            fullMenuList.add(new FoodItem("Cola", "Cold Drink", 50.00, android.R.drawable.ic_menu_gallery, "Drink"));
-            fullMenuList.add(new FoodItem("Künefe", "Sweet Cheese", 120.00, android.R.drawable.ic_menu_gallery, "Dessert"));
+            fullMenuList.add(new FoodItem("Et Döner Dürüm", "Traditional Taste", 150.00, R.drawable.et_doner, "Dürüm"));
+            fullMenuList.add(new FoodItem("Tavuk Döner Dürüm", "Classic Chicken", 100.00, R.drawable.tavuk_doner, "Dürüm"));
+            fullMenuList.add(new FoodItem("Pilav Üstü Porsiyon", "With Rice", 200.00, R.drawable.pilav_ustu, "Porsiyon"));
+            fullMenuList.add(new FoodItem("Ayran", "Fresh Yoghurt Drink", 20.00, R.drawable.ayran, "Drink"));
+            fullMenuList.add(new FoodItem("Cola", "Cold Drink", 50.00, R.drawable.cola, "Drink"));
+            fullMenuList.add(new FoodItem("Künefe", "Sweet Cheese", 120.00, R.drawable.kunefe, "Dessert"));
 
             setupButtons(btn1, btn2, btn3, btn4, "Dürüm", "Porsiyon", "Drink", "Dessert");
-
 
         } else if (restaurantName != null && (restaurantName.contains("Waffle") || restaurantName.contains("Dessert"))) {
             if(btn1 != null) btn1.setText("Waffles");
@@ -133,14 +121,13 @@ public class RestaurantMenuFragment extends Fragment {
             if(btn3 != null) btn3.setText("Drinks");
             if(btn4 != null) btn4.setText("Ice Cream");
 
-            fullMenuList.add(new FoodItem("Classic Waffle", "Chocolate & Banana", 160.00, android.R.drawable.ic_menu_gallery, "Waffle"));
-            fullMenuList.add(new FoodItem("Fruit Bomb", "Mixed Fruits", 180.00, android.R.drawable.ic_menu_gallery, "Fruit"));
-            fullMenuList.add(new FoodItem("Chocolate Lover", "Dark & White Choco", 170.00, android.R.drawable.ic_menu_gallery, "Waffle"));
-            fullMenuList.add(new FoodItem("Coffee", "Hot Filter Coffee", 60.00, android.R.drawable.ic_menu_gallery, "Drink"));
-            fullMenuList.add(new FoodItem("Vanilla Ice Cream", "Cold", 40.00, android.R.drawable.ic_menu_gallery, "Ice"));
+            fullMenuList.add(new FoodItem("Classic Waffle", "Chocolate & Banana", 160.00, R.drawable.waffle, "Waffle"));
+            fullMenuList.add(new FoodItem("Fruit Bomb", "Mixed Fruits", 180.00, R.drawable.fruits, "Fruit"));
+            fullMenuList.add(new FoodItem("Chocolate Lover", "Dark & White Choco", 170.00, R.drawable.chocolate_waffle, "Waffle"));
+            fullMenuList.add(new FoodItem("Coffee", "Hot Coffee", 60.00, R.drawable.coffee, "Drink"));
+            fullMenuList.add(new FoodItem("Vanilla Ice Cream", "Cold", 40.00, R.drawable.vanilla_ice_cream, "Ice"));
 
             setupButtons(btn1, btn2, btn3, btn4, "Waffle", "Fruit", "Drink", "Ice");
-
 
         } else {
             if(btn1 != null) btn1.setText("Burgers");
@@ -148,25 +135,21 @@ public class RestaurantMenuFragment extends Fragment {
             if(btn3 != null) btn3.setText("Drinks");
             if(btn4 != null) btn4.setText("Desserts");
 
-            fullMenuList.add(new FoodItem("Burger Menu 1", "Cheeseburger + Fries", 350.99, android.R.drawable.ic_menu_gallery, "Burger"));
-            fullMenuList.add(new FoodItem("Big King Burger", "Double Meat", 400.00, android.R.drawable.ic_menu_gallery, "Burger"));
-            fullMenuList.add(new FoodItem("Chicken Burger", "Crispy Chicken", 250.00, android.R.drawable.ic_menu_gallery, "Burger"));
-            fullMenuList.add(new FoodItem("Kids Menu", "Small Burger + Toy", 200.00, android.R.drawable.ic_menu_gallery, "Menu"));
-            fullMenuList.add(new FoodItem("Whopper Menu", "Large + Drink", 380.00, android.R.drawable.ic_menu_gallery, "Menu"));
-            fullMenuList.add(new FoodItem("Cola", "Drink", 50.00, android.R.drawable.ic_menu_gallery, "Drink"));
-            fullMenuList.add(new FoodItem("Ice Cream", "Dessert", 40.00, android.R.drawable.ic_menu_gallery, "Dessert"));
+            fullMenuList.add(new FoodItem("Burger Menu 1", "Cheeseburger + Fries", 350.99, R.drawable.burger_menu_1, "Burger"));
+            fullMenuList.add(new FoodItem("Burger Menu 2", "Double Meat", 400.00, R.drawable.burger_menu_2, "Burger"));
+            fullMenuList.add(new FoodItem("Chicken Burger", "Crispy Chicken", 250.00, R.drawable.chicken_burger, "Burger"));
+            fullMenuList.add(new FoodItem("Cola", "Drink", 50.00, R.drawable.cola, "Drink"));
+            fullMenuList.add(new FoodItem("Ice Cream", "Dessert", 40.00, R.drawable.ice_cream, "Dessert"));
 
             setupButtons(btn1, btn2, btn3, btn4, "Burger", "Menu", "Drink", "Dessert");
         }
     }
 
     private void setupButtons(Button b1, Button b2, Button b3, Button b4, String k1, String k2, String k3, String k4) {
-
         if(b1!=null) b1.setOnClickListener(v -> { filterList(k1); updateCategoryVisuals(b1, b2, b3, b4); });
         if(b2!=null) b2.setOnClickListener(v -> { filterList(k2); updateCategoryVisuals(b2, b1, b3, b4); });
         if(b3!=null) b3.setOnClickListener(v -> { filterList(k3); updateCategoryVisuals(b3, b1, b2, b4); });
         if(b4!=null) b4.setOnClickListener(v -> { filterList(k4); updateCategoryVisuals(b4, b1, b2, b3); });
-
 
         updateCategoryVisuals(b1, b2, b3, b4);
         filterList(k1);
@@ -187,13 +170,10 @@ public class RestaurantMenuFragment extends Fragment {
 
     private void filterList(String keyword) {
         List<FoodItem> filteredList = new ArrayList<>();
-
         for (FoodItem item : fullMenuList) {
             if (item.getType().equalsIgnoreCase(keyword)) {
-
                 filteredList.add(item);
             } else if (item.getName().toLowerCase().contains(keyword.toLowerCase())) {
-
                 filteredList.add(item);
             }
         }

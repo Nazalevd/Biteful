@@ -1,44 +1,39 @@
 package msku.ceng.madlab.biteful;
 
-import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-// Toast sildiğimiz için importu kaldırdık
-
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import msku.ceng.madlab.biteful.database.BitefulDatabase;
-import msku.ceng.madlab.biteful.database.BitefulDao;
-import msku.ceng.madlab.biteful.database.Favorite;
-
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.RestaurantViewHolder> {
 
     private List<Restaurant> restaurantList;
-    private OnItemClickListener listener;
+    private OnRestaurantClickListener listener;
     private boolean isFavoritesList = false;
 
-    public interface OnItemClickListener {
-        void onItemClick(Restaurant restaurant);
+    public interface OnRestaurantClickListener {
+        void onRestaurantClick(Restaurant restaurant);
     }
 
-    public RestaurantAdapter(List<Restaurant> restaurantList, OnItemClickListener listener) {
+    public RestaurantAdapter(List<Restaurant> restaurantList, OnRestaurantClickListener listener) {
         this.restaurantList = restaurantList;
         this.listener = listener;
-    }
-
-    public void setIsFavoritesList(boolean isFavoritesList) {
-        this.isFavoritesList = isFavoritesList;
     }
 
     public void setFilteredList(List<Restaurant> filteredList) {
         this.restaurantList = filteredList;
         notifyDataSetChanged();
+    }
+
+    public void setIsFavoritesList(boolean isFavoritesList) {
+        this.isFavoritesList = isFavoritesList;
     }
 
     @NonNull
@@ -54,60 +49,14 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
         holder.tvName.setText(restaurant.getName());
         holder.tvRating.setText(restaurant.getRating());
-        holder.tvTime.setText(restaurant.getDeliveryTime());
-        holder.imgRes.setImageResource(restaurant.getImageResId());
+        holder.tvDeliveryTime.setText(restaurant.getDeliveryTime());
+        holder.imgRestaurant.setImageResource(restaurant.getImageResId());
 
-        checkFavoriteStatus(holder, restaurant);
+        holder.itemView.setOnClickListener(v -> listener.onRestaurantClick(restaurant));
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(restaurant));
+        checkIfFavorite(holder, restaurant.getName());
 
-        holder.btnFavorite.setOnClickListener(v -> {
-            toggleFavorite(v, restaurant, holder.btnFavorite, holder.getBindingAdapterPosition());
-        });
-    }
-
-    private void checkFavoriteStatus(RestaurantViewHolder holder, Restaurant restaurant) {
-        BitefulDatabase.databaseWriteExecutor.execute(() -> {
-            boolean isFav = BitefulDatabase.getDatabase(holder.itemView.getContext())
-                    .bitefulDao().isFavorite(restaurant.getName());
-
-            holder.itemView.post(() -> {
-                if (isFav) {
-                    holder.btnFavorite.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFADBB6));
-                } else {
-                    holder.btnFavorite.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFFFFF));
-                }
-            });
-        });
-    }
-
-    private void toggleFavorite(View view, Restaurant restaurant, ImageView btnHeart, int position) {
-        BitefulDatabase.databaseWriteExecutor.execute(() -> {
-            BitefulDao dao = BitefulDatabase.getDatabase(view.getContext()).bitefulDao();
-            boolean isFav = dao.isFavorite(restaurant.getName());
-
-            if (isFav) {
-                dao.deleteFavoriteByName(restaurant.getName());
-
-                ((Activity) view.getContext()).runOnUiThread(() -> {
-                    if (isFavoritesList) {
-                        if (position != RecyclerView.NO_POSITION && position < restaurantList.size()) {
-                            restaurantList.remove(position);
-                            notifyItemRemoved(position);
-                            notifyItemRangeChanged(position, restaurantList.size());
-                        }
-                    } else {
-                        btnHeart.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFFFFF));
-                    }
-                });
-            } else {
-                dao.insertFavorite(new Favorite(restaurant.getName(), restaurant.getRating(), restaurant.getDeliveryTime(), restaurant.getImageResId()));
-
-                ((Activity) view.getContext()).runOnUiThread(() -> {
-                    btnHeart.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFADBB6));
-                });
-            }
-        });
+        holder.btnFavorite.setOnClickListener(v -> toggleFavorite(holder, restaurant));
     }
 
     @Override
@@ -115,16 +64,66 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         return restaurantList.size();
     }
 
-    static class RestaurantViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvRating, tvTime;
-        ImageView imgRes, btnFavorite;
+    private void checkIfFavorite(RestaurantViewHolder holder, String restaurantName) {
+        FirebaseFirestore.getInstance().collection("favorites")
+                .whereEqualTo("restaurantName", restaurantName)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        holder.btnFavorite.setImageResource(R.drawable.ic_heart);
+                        holder.btnFavorite.setColorFilter(android.graphics.Color.RED);
+                        holder.btnFavorite.setTag("fav");
+                    } else {
+                        holder.btnFavorite.setImageResource(R.drawable.ic_heart);
+                        holder.btnFavorite.clearColorFilter();
+                        holder.btnFavorite.setTag("not_fav");
+                    }
+                });
+    }
+
+    private void toggleFavorite(RestaurantViewHolder holder, Restaurant restaurant) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String currentTag = (String) holder.btnFavorite.getTag();
+
+        if ("fav".equals(currentTag)) {
+            db.collection("favorites")
+                    .whereEqualTo("restaurantName", restaurant.getName())
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                            db.collection("favorites").document(doc.getId()).delete();
+                        }
+                        holder.btnFavorite.clearColorFilter();
+                        holder.btnFavorite.setTag("not_fav");
+                        Toast.makeText(holder.itemView.getContext(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            Favorites newFav = new Favorites(
+                    restaurant.getName(),
+                    restaurant.getRating(),
+                    restaurant.getDeliveryTime(),
+                    restaurant.getImageResId()
+            );
+
+            db.collection("favorites").add(newFav)
+                    .addOnSuccessListener(documentReference -> {
+                        holder.btnFavorite.setColorFilter(android.graphics.Color.RED);
+                        holder.btnFavorite.setTag("fav");
+                        Toast.makeText(holder.itemView.getContext(), "Added to Favorites", Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    public static class RestaurantViewHolder extends RecyclerView.ViewHolder {
+        TextView tvName, tvRating, tvDeliveryTime;
+        ImageView imgRestaurant, btnFavorite;
 
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvRestaurantName);
-            tvRating = itemView.findViewById(R.id.tvRating);
-            tvTime = itemView.findViewById(R.id.tvDeliveryTime);
-            imgRes = itemView.findViewById(R.id.imgRestaurant);
+            tvRating = itemView.findViewById(R.id.tvRestaurantRating);
+            tvDeliveryTime = itemView.findViewById(R.id.tvDeliveryTime);
+            imgRestaurant = itemView.findViewById(R.id.imgRestaurant);
             btnFavorite = itemView.findViewById(R.id.btnFavorite);
         }
     }

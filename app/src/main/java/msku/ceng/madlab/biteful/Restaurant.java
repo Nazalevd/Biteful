@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class Restaurant implements Serializable {
     private String name;
-    private String rating; // Örn: "4.6 (3500+)"
-    private String deliveryTime; // Örn: "15-20 min"
-    private int imageResId; // Resim
+    private String rating;
+    private String deliveryTime;
+    private int imageResId;
 
     public Restaurant(String name, String rating, String deliveryTime, int imageResId) {
         this.name = name;

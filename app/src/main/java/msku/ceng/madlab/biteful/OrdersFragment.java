@@ -4,13 +4,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import msku.ceng.madlab.biteful.database.BitefulDatabase;
-import msku.ceng.madlab.biteful.database.Order;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,9 @@ public class OrdersFragment extends Fragment {
     private RecyclerView recyclerView;
     private OrdersAdapter adapter;
     private List<Order> orderList = new ArrayList<>();
+    private TextView tvEmptyState;
+
+    public OrdersFragment() { }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -30,29 +35,46 @@ public class OrdersFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.rvOrders);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        adapter = new OrdersAdapter(orderList);
-        recyclerView.setAdapter(adapter);
-
+        tvEmptyState = view.findViewById(R.id.tvEmptyOrders);
         View btnBack = view.findViewById(R.id.btnBackOrders);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> {
-                androidx.navigation.Navigation.findNavController(v).popBackStack();
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                } else if (getActivity() != null) {
+                    getActivity().onBackPressed();
+                }
             });
         }
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new OrdersAdapter(orderList);
+        recyclerView.setAdapter(adapter);
 
         loadOrders();
     }
 
     private void loadOrders() {
-        BitefulDatabase.databaseWriteExecutor.execute(() -> {
-            List<Order> orders = BitefulDatabase.getDatabase(requireContext()).bitefulDao().getAllOrders();
-            getActivity().runOnUiThread(() -> {
-                orderList.clear();
-                orderList.addAll(orders);
-                adapter.notifyDataSetChanged();
-            });
-        });
+        FirebaseFirestore.getInstance().collection("orders")
+                .orderBy("date", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    orderList.clear();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Order order = doc.toObject(Order.class);
+                        if (order != null) {
+                            order.setDocumentId(doc.getId());
+                            orderList.add(order);
+                        }
+                    }
+
+                    if (orderList.isEmpty()) {
+                        if (tvEmptyState != null) tvEmptyState.setVisibility(View.VISIBLE);
+                    } else {
+                        if (tvEmptyState != null) tvEmptyState.setVisibility(View.GONE);
+                    }
+
+                    adapter.notifyDataSetChanged();
+                });
     }
 }

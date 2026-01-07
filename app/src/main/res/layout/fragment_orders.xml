@@ -1,41 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#F5F5F5">
 
     <LinearLayout
+        android:id="@+id/layoutHeaderOrders"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:padding="16dp"
-        android:elevation="4dp"
+        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:padding="16dp">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnBackOrders"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/ic_back"
-            android:layout_marginEnd="16dp"
-            android:clickable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#000000"
+            android:contentDescription="Back" />
 
         <TextView
+            android:id="@+id/tvHeaderOrders"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="My Orders"
-            android:textSize="20sp"
+            android:text="Past Orders"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="#000000"/>
+            android:textColor="#000000"
+            android:layout_marginStart="16dp"/>
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvOrders"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/layoutHeaderOrders"
+        android:clipToPadding="false"
         android:padding="8dp"/>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tvEmptyOrders"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No past orders found"
+        android:textSize="18sp"
+        android:textColor="#888888"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+</RelativeLayout>

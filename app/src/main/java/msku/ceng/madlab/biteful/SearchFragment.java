@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView; // Geri tuşu için
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
@@ -13,10 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import msku.ceng.madlab.biteful.database.BitefulDatabase;
-import msku.ceng.madlab.biteful.database.SearchHistory;
-
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,10 +21,8 @@ public class SearchFragment extends Fragment {
 
     private RecyclerView rvResults, rvHistory;
     private SearchView searchView;
-
     private RestaurantAdapter resultsAdapter;
     private SearchHistoryAdapter historyAdapter;
-
     private List<Restaurant> allRestaurants = new ArrayList<>();
     private List<SearchHistory> historyList = new ArrayList<>();
 
@@ -66,14 +61,12 @@ public class SearchFragment extends Fragment {
             public void onItemClick(String query) {
                 searchView.setQuery(query, true);
             }
-
             @Override
             public void onDeleteClick(SearchHistory history) {
                 deleteHistory(history);
             }
         });
         rvHistory.setAdapter(historyAdapter);
-
         loadHistory();
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -83,7 +76,6 @@ public class SearchFragment extends Fragment {
                 filter(query);
                 return true;
             }
-
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.isEmpty()) {
@@ -107,7 +99,6 @@ public class SearchFragment extends Fragment {
         });
     }
 
-
     private void filter(String text) {
         List<Restaurant> filteredList = new ArrayList<>();
         if (text != null && !text.isEmpty()) {
@@ -123,54 +114,61 @@ public class SearchFragment extends Fragment {
 
     private void saveSearchToDb(String query) {
         if (query == null || query.trim().isEmpty()) return;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        BitefulDatabase.databaseWriteExecutor.execute(() -> {
-            BitefulDatabase.getDatabase(requireContext()).bitefulDao().deleteSearchHistoryByQuery(query);
-            BitefulDatabase.getDatabase(requireContext()).bitefulDao().insertSearchHistory(new SearchHistory(query, System.currentTimeMillis()));
-        });
+        db.collection("search_history")
+                .whereEqualTo("query", query)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    for (DocumentSnapshot doc : snapshots) {
+                        doc.getReference().delete();
+                    }
+                    SearchHistory history = new SearchHistory(query, System.currentTimeMillis());
+                    db.collection("search_history").add(history);
+                });
     }
 
     private void loadHistory() {
-        BitefulDatabase.databaseWriteExecutor.execute(() -> {
-            List<SearchHistory> list = BitefulDatabase.getDatabase(requireContext()).bitefulDao().getAllSearchHistory();
-
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("search_history")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
                     historyList.clear();
-                    historyList.addAll(list);
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        SearchHistory item = doc.toObject(SearchHistory.class);
+                        if (item != null) {
+                            item.setDocumentId(doc.getId());
+                            historyList.add(item);
+                        }
+                    }
                     historyAdapter.notifyDataSetChanged();
-
                     if (historyList.isEmpty()) {
                         rvHistory.setVisibility(View.GONE);
                     } else if (searchView.getQuery().toString().isEmpty()){
                         rvHistory.setVisibility(View.VISIBLE);
                     }
                 });
-            }
-        });
     }
 
     private void deleteHistory(SearchHistory history) {
-        BitefulDatabase.databaseWriteExecutor.execute(() -> {
-            BitefulDatabase.getDatabase(requireContext()).bitefulDao().deleteSearchHistory(history.id);
-
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    historyList.remove(history);
-                    historyAdapter.notifyDataSetChanged();
-                });
-            }
-        });
+        if (history.getDocumentId() != null) {
+            FirebaseFirestore.getInstance().collection("search_history")
+                    .document(history.getDocumentId())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        historyList.remove(history);
+                        historyAdapter.notifyDataSetChanged();
+                    });
+        }
     }
 
     private void loadDummyData() {
         allRestaurants.clear();
-
         allRestaurants.add(new Restaurant("Campus Burger", "⭐ 4.6 (3500+)", "15-20 min", R.drawable.res_campus_burger));
         allRestaurants.add(new Restaurant("Kotekli Pizza", "⭐ 4.2 (1200+)", "30-45 min", R.drawable.res_kotekli_pizza));
         allRestaurants.add(new Restaurant("Doner House", "⭐ 4.8 (5000+)", "10-15 min", R.drawable.res_doner_house));
         allRestaurants.add(new Restaurant("Sushi Co", "⭐ 4.5 (800+)", "40-50 min", R.drawable.res_sushi_co));
         allRestaurants.add(new Restaurant("Waffle World", "⭐ 4.0 (900+)", "20-30 min", R.drawable.res_waffle_world));
-        allRestaurants.add(new Restaurant("Burger King", "⭐ 3.9 (10k+)", "15-25 min", R.drawable.res_burger_king));
     }
 }

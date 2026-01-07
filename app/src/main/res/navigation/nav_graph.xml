@@ -50,10 +50,11 @@
         android:label="Menu"
         tools:layout="@layout/fragment_restaurant_menu" />
 
+
     <fragment
         android:id="@+id/ordersFragment"
         android:name="msku.ceng.madlab.biteful.OrdersFragment"
-        android:label="My Orders"
+        android:label="fragment_orders"
         tools:layout="@layout/fragment_orders" />
 
 </navigation>

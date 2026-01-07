@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import msku.ceng.madlab.biteful.database.SearchHistory;
 import java.util.List;
 
 public class SearchHistoryAdapter extends RecyclerView.Adapter<SearchHistoryAdapter.HistoryViewHolder> {
@@ -35,9 +34,11 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<SearchHistoryAdap
     @Override
     public void onBindViewHolder(@NonNull HistoryViewHolder holder, int position) {
         SearchHistory item = historyList.get(position);
-        holder.tvText.setText(item.query);
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(item.query));
+        holder.tvText.setText(item.getQuery());
+
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(item.getQuery()));
+
         holder.btnDelete.setOnClickListener(v -> listener.onDeleteClick(item));
     }
 
